@@ -33,10 +33,19 @@ app.get("/api/", function (req, res) {
   });
 });
 
+app.get("/api/", function (req, res) {});
+
 app.get("/api/:date_string", function (req, res) {
   let dateString = req.params.date_string;
-  console.log(dateString);
   let passedInValue = new Date(dateString);
+
+  if (parseInt(dateString) > 10000) {
+    let unixTime = new Date(parseInt(dateString));
+    res.json({
+      unix: unixTime.getTime(),
+      utc: unixTime.toUTCString(),
+    });
+  }
 
   if (passedInValue == "Invalid Date") {
     res.json({ error: "Invalid Date" });
