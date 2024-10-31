@@ -1,7 +1,3 @@
-// index.js
-// where your node app starts
-
-// init project
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
@@ -33,6 +29,16 @@ app.get("/api/hello", function (req, res) {
   res.json({ greeting: "hello API" });
 });
 
+app.get("/api/whoami", function (req, res) {
+  res.json({
+    // value: Object.keys(req),
+    ipaddress: req.connection.remoteAddress,
+    language: req.headers["accept-language"],
+    software: req.headers["user-agent"],
+    // "req-headers": req.headers,
+  });
+});
+
 app.get("/api/", function (req, res) {
   let now = new Date();
   res.json({
@@ -41,27 +47,25 @@ app.get("/api/", function (req, res) {
   });
 });
 
-app.get("/api/", function (req, res) {});
-
 app.get("/api/:date_string", function (req, res) {
   let dateString = req.params.date_string;
-  let passedInValue = new Date(dateString);
 
-  if (parseInt(dateString) > 10000) {
+  if (!isNaN(dateString) && parseInt(dateString) > 10000) {
     let unixTime = new Date(parseInt(dateString));
     res.json({
       unix: unixTime.getTime(),
       utc: unixTime.toUTCString(),
     });
-  }
-
-  if (passedInValue == "Invalid Date") {
-    res.json({ error: "Invalid Date" });
   } else {
-    res.json({
-      unix: passedInValue.getTime(),
-      utc: passedInValue.toUTCString(),
-    });
+    let passedInValue = new Date(dateString);
+    if (passedInValue == "Invalid Date") {
+      res.json({ error: "Invalid Date" });
+    } else {
+      res.json({
+        unix: passedInValue.getTime(),
+        utc: passedInValue.toUTCString(),
+      });
+    }
   }
 });
 

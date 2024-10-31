@@ -7,15 +7,16 @@
     "node": "20.x"
   },
   "scripts": {
-    "start": "node index.js",
+    "start": " nodemon --inspect index.js localhost 3000",
     "test": "node test.js"
   },
   "dependencies": {
+    "cors": "^2.8.0",
     "ejs": "^3.1.9",
-    "express": "^4.15.2",
-    "cors": "^2.8.0"
+    "express": "^4.15.2"
   },
   "devDependencies": {
+    "nodemon": "^3.1.7",
     "tape": "^5.7.4"
   },
   "repository": {
