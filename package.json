@@ -1,5 +1,5 @@
 {
-  "name": "timestamp-microservices-app",
+  "name": "microservices-app",
   "version": "0.0.1",
   "description": "The Useful Programmer FCC Backend Challenge WebApp",
   "main": "index.js",
