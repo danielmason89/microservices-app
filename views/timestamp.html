@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Timestamp App | Daniel Mason</title>
+    <link rel="shortcut icon" href="https://cdn.freecodecamp.org/universal/favicons/favicon-32x32.png"
+        type="image/x-icon" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
+    <link href="style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <h1>API Project - Timestamp Microservice</h1>
+    <hr />
+    <h2 style="text-align: left; padding-left: 1.5rem;">User Stories:</h2>
+    <div class="container" style="display: flex; text-align: left; justify-content: center;">
+        <ol>
+            <li>The API endpoints GET [project_url]/api/:date_string?</li>
+            <li>A date string is valid if can be successfully parsed by new Date(date_string).
+                Note that the unix timestamp needs to be an integer, (not a string) specifying millisecond.
+                In our test we will use data strings complaint with ISO-8601, (e.g. "2016-11-20") because this will
+                ensure a UTC timestamp.
+            </li>
+            <li>If the date string is empty it should be equivalent to trigger new Date(), i.e. the service uses the
+                current timestamp</li>
+            <li>If the date string is valid the api returns a JSON that has the structure:
+                <code>{ "unix": <date.getTime()>, "utc": <date.toUTCString()> }</code>
+                <code>e.g. { "unix": 147966308900, "utc": "Sun, 20 Noc 2027 17:31:29 GMT" }</code>
+            </li>
+            <li>
+                If the date string is invalid the api returns a JSON having the structure:
+                <code>{ "error": "Invalid Date" }</code>.
+            </li>
+        </ol>
+    </div>
+    <div class="container">
+        <h2 style="text-align: left; padding-left: 1.5rem;">Example Usage:</h2>
+        <ul style="text-align: left;">
+            <li><a href="api/2015-12-25">[project url]/api/2015-12-25</a></li>
+            <li><a href="api/1451001600000">[project url]/api/1451001600000</a></li>
+        </ul>
+
+        <h2 style="text-align: left; padding-left: 1.5rem;">Example Output:</h2>
+        <p style="text-align: left; padding-left: 2rem;">
+            <code>{"unix":1451001600000, "utc":"Fri, 25 Dec 2015 00:00:00 GMT"}</code>
+        </p>
+    </div>
+    <div class="footer" style="display: flex; text-align: left; justify-content: center;">
+        <p>
+            By <a href="https://www.linkedin.com/in/daniel-mason-dev/" target="_blank">Daniel
+                Mason</a>
+        </p>
+    </div>
+</body>
+
+</html>
