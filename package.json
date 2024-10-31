@@ -1,18 +1,26 @@
 {
-  "name": "fcc-api-projects-boilerplate",
+  "name": "useful-programmer-portfolio-app",
   "version": "0.0.1",
-  "description": "An FCC Backend Challenge",
+  "description": "The Useful Programmer FCC Backend Challenge WebApp",
   "main": "index.js",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "node test.js"
   },
   "dependencies": {
-    "express": "^4.12.4",
+    "ejs": "^3.1.9",
+    "express": "^4.15.2",
     "cors": "^2.8.0"
+  },
+  "devDependencies": {
+    "tape": "^5.7.4"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/freeCodeCamp/boilerplate-project-timestamp.git"
+    "url": "https://github.com/danielmason89/useful-programmer-portfolio-app"
   },
   "bugs": {
     "url": "https://github.com/freeCodeCamp/freeCodeCamp/issues"
@@ -21,6 +29,8 @@
   "author": "freeCodeCamp <team@freecodecamp.org>",
   "keywords": [
     "node",
+    "heroku",
+    "hyperdev",
     "express",
     "freeCodeCamp"
   ],
