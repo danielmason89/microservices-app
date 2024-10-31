@@ -1,7 +1,7 @@
 {
   "name": "microservices-app",
   "version": "0.0.1",
-  "description": "The Useful Programmer FCC Backend Challenge WebApp",
+  "description": "Daniel Mason's FCC Backend Challenge App",
   "main": "index.js",
   "engines": {
     "node": "20.x"
