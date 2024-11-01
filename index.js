@@ -23,11 +23,13 @@ mongoose
   .catch((err) => console.error("Failed to connect to MongoDB:", err));
 
 const port = process.env.PORT || 3000;
-const corsOptions = {
-  origin: "*",
-  optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
+const allowedOrigins = [
+  "https://www.freecodecamp.org",
+  "http://localhost:3000",
+];
+
+// Apply CORS globally with middleware
+app.use(cors({ origin: allowedOrigins, optionsSuccessStatus: 200 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -76,31 +78,24 @@ let ShortURL = mongoose.model(
 app.post("/api/shorturl", async (req, res) => {
   let client_requested_url = req.body.url;
 
-  if (
-    !client_requested_url.startsWith("http://") &&
-    !client_requested_url.startsWith("https://")
-  ) {
+  if (!/^https?:\/\/.+\..+/.test(client_requested_url)) {
     return res.json({ error: "invalid url" });
   }
 
   let suffix = nanoid();
+  const newURL = new ShortURL({ original_url: client_requested_url, suffix });
 
-  let newURL = new ShortURL({
-    original_url: client_requested_url,
-    suffix: suffix,
-  });
-
-  newURL.save();
-
-  res.json({
-    short_url: suffix,
-    original_url: newURL.original_url,
-  });
+  try {
+    await newURL.save();
+    res.json({ short_url: suffix, original_url: newURL.original_url });
+  } catch (error) {
+    console.error("Error saving URL:", error);
+    res.status(500).json({ error: "server error" });
+  }
 });
 
 app.get("/api/shorturl/:suffix", async (req, res) => {
   try {
-    let userGeneratedSuffix = req.params.suffix;
     const foundUrl = await ShortURL.findOne({ suffix: userGeneratedSuffix });
     if (!foundUrl) {
       return res.status(404).json({ error: "No URL found" });
