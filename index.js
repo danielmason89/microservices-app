@@ -100,36 +100,12 @@ app.post("/api/shorturl", async (req, res) => {
   }
 });
 
-app.get("/api/shorturl/:suffix", async (req, res) => {
-  try {
-    let userGeneratedSuffix = req.params.suffix;
-    let foundUrl = await ShortURL.findOne({ suffix: userGeneratedSuffix });
-
-    if (foundUrl) {
-      // Render an intermediate HTML page with a link that opens in a new tab
-      res.send(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Redirecting...</title>
-        </head>
-        <body>
-          <p>Redirecting you to <a href="${foundUrl.original_url}" target="_blank">your destination</a>...</p>
-          <script>
-            window.open("${foundUrl.original_url}", "_blank");
-          </script>
-        </body>
-        </html>
-      `);
-    } else {
-      res.status(404).json({ error: "URL not found" });
-    }
-  } catch (error) {
-    console.error("Error handling /api/shorturl/:suffix:", error);
-    res.status(500).json({ error: "Server error" });
-  }
+app.get("/api/shorturl/:suffix", (req, res) => {
+  let userGeneratedSuffix = req.params.suffix;
+  ShortURL.find({ suffix: userGeneratedSuffix }).then((foundUrls) => {
+    let urlForDirect = foundUrls[0];
+    res.redirect(urlForDirect.original_url);
+  });
 });
 
 // Timestamp Microservice
