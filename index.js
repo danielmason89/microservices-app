@@ -18,18 +18,16 @@ const port = process.env.PORT || 3000;
 dotenv.config();
 const app = express();
 
-const connectDB = async () => {
+const connectDb = async () => {
   try {
-    mongoose
-      .connect(process.env.DB_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        bufferCommands: false,
-      })
-      .then(() => console.log("Connected to MongoDB"))
-      .catch((err) => console.error("Failed to connect to MongoDB:", err));
+    const connect = await mongoose.connect(process.env.DB_URI);
+    console.log(
+      "Database connected:",
+      connect.connection.host,
+      connect.connection.name
+    );
   } catch (err) {
-    console.error(err.response.data.message);
+    console.error(err.message);
   }
 };
 
@@ -42,12 +40,13 @@ const isValidUrl = (url) => {
   });
 };
 
-connectDB();
-app.use(cors());
+connectDb();
+
+app.use(cors()); // allow requests from all servers
+
 app.use(express.urlencoded({ extended: true }));
+
 app.use("/public", express.static(`${process.cwd()}/public`));
-app.use(cors({ origin: "https://www.freecodecamp.org" }));
-app.use(cors({ optionsSuccessStatus: 200 })); // some legacy browsers choke on 204
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static("public"));
@@ -89,42 +88,44 @@ app.get("/api/whoami", (req, res) => {
 app.post(
   "/api/shorturl",
   expressAsyncHandler(async (req, res) => {
-    const { url: original_url } = req.body;
+    const original_url = req.body.url;
 
-    // Validate the URL
     if (!isValidUrl(original_url)) {
-      return res.json({ error: "invalid url" });
+      res.json({
+        error: "invalid url",
+      });
+      throw new Error("Invalid URL");
     }
 
-    // Check if the URL already exists
-    const existingUrl = await Url.findOne({ original_url });
-    if (existingUrl) {
-      return res.json({
-        original_url: existingUrl.original_url,
-        short_url: existingUrl.short_url,
+    const foundUrl = await Url.findOne({ long_url: original_url });
+    if (foundUrl) {
+      res.json({
+        original_url: foundUrl.long_url,
+        short_url: foundUrl.short_url,
+      });
+    } else {
+      const newUrl = await Url.create({
+        long_url: original_url,
+      });
+      console.log("New URL successfully stored:", newUrl);
+      res.json({
+        original_url: newUrl.long_url,
+        short_url: newUrl.short_url,
       });
     }
-
-    // Create a new short URL
-    const newUrl = await Url.create({ original_url });
-    return res.json({
-      original_url: newUrl.original_url,
-      short_url: newUrl.short_url,
-    });
   })
 );
 
 app.get(
   "/api/shorturl/:shortUrl",
   expressAsyncHandler(async (req, res) => {
-    const shortUrl = parseInt(req.params.shortUrl);
+    const shortUrl = Number(req.params.shortUrl);
 
     const foundUrl = await Url.findOne({ short_url: shortUrl });
     if (foundUrl) {
-      return res.redirect(foundUrl.original_url);
+      const { long_url } = foundUrl;
+      res.redirect(long_url);
     }
-
-    res.status(404).json({ error: "No URL found for this short_url" });
   })
 );
 
@@ -138,24 +139,25 @@ app.get("/api/", (req, res) => {
 });
 
 app.get("/api/:date_string", (req, res) => {
-  const dateString = req.params.date_string;
-  const isUnixTimestamp = !isNaN(dateString) && parseInt(dateString) > 10000;
+  let dateString = req.params.date_string;
 
-  let date;
-  if (isUnixTimestamp) {
-    date = new Date(parseInt(dateString));
+  if (!isNaN(dateString) && parseInt(dateString) > 10000) {
+    let unixTime = new Date(parseInt(dateString));
+    res.json({
+      unix: unixTime.getTime(),
+      utc: unixTime.toUTCString(),
+    });
   } else {
-    date = new Date(dateString);
+    let passedInValue = new Date(dateString);
+    if (passedInValue == "Invalid Date") {
+      res.json({ error: "Invalid Date" });
+    } else {
+      res.json({
+        unix: passedInValue.getTime(),
+        utc: passedInValue.toUTCString(),
+      });
+    }
   }
-
-  if (isNaN(date.getTime())) {
-    return res.json({ error: "Invalid Date" });
-  }
-
-  res.json({
-    unix: date.getTime(),
-    utc: date.toUTCString(),
-  });
 });
 
 // Listen on port set in environment variable or default to 3000
