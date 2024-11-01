@@ -81,26 +81,26 @@ app.get("/api/whoami", (req, res) => {
 app.post(
   "/api/shorturl",
   expressAsyncHandler(async (req, res) => {
-    let client_requested_url = req.body.url;
+    let original_url = req.body.url;
 
-    if (!isValidUrl(client_requested_url)) {
+    if (!isValidUrl(original_url)) {
       res.json({
         error: "invalid url",
       });
       throw new Error("Invalid URL");
     }
 
-    const foundUrl = await Url.findOne({ client_requested_url });
+    const foundUrl = await Url.findOne({ original_url });
     if (foundUrl) {
       res.json({
-        client_requested_url: foundUrl.client_requested_url,
+        original_url: foundUrl.original_url,
         short_url: foundUrl.short_url,
       });
     } else {
-      newUrl = await Url.create({ client_requested_url });
+      const newUrl = await Url.create({ original_url });
       res.json({
-        client_requested_url: newURL.client_requested_url,
-        short_url: newURL.short_url,
+        original_url: newUrl.original_url,
+        short_url: newUrl.short_url,
       });
     }
   })
@@ -113,7 +113,7 @@ app.get(
 
     const foundUrl = await Url.findOne({ short_url: shortUrl });
     if (foundUrl) {
-      res.redirect(foundUrl.client_requested_url);
+      res.redirect(foundUrl.original_url);
     } else {
       res.status(404).json({ error: "URL not found" });
     }

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const urlSchema = mongoose.Schema({
-  client_requested_url: {
+  original_url: {
     type: String,
     required: [true, "Please add the long url"],
     unique: true,
