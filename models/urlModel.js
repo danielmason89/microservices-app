@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const urlSchema = mongoose.Schema({
-  long_url: {
+  original_url: {
     type: String,
     required: [true, "Please add the original URL"],
   },

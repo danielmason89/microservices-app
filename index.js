@@ -46,8 +46,8 @@ connectDB();
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static(`${process.cwd()}/public`));
-// app.use(cors({ origin: "https://www.freecodecamp.org" }));
-// app.use(cors({ optionsSuccessStatus: 200 })); // some legacy browsers choke on 204
+app.use(cors({ origin: "https://www.freecodecamp.org" }));
+app.use(cors({ optionsSuccessStatus: 200 })); // some legacy browsers choke on 204
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static("public"));
@@ -89,25 +89,29 @@ app.get("/api/whoami", (req, res) => {
 app.post(
   "/api/shorturl",
   expressAsyncHandler(async (req, res) => {
-    let original_url = req.body.url;
+    const original_url = req.body.url;
 
     if (!isValidUrl(original_url)) {
       return res.json({ error: "invalid url" });
     }
 
-    const foundUrl = await Url.findOne({ long_url: original_url });
+    const foundUrl = await Url.findOne({ original_url });
     if (foundUrl) {
       return res.json({
-        original_url: foundUrl.long_url,
+        original_url: foundUrl.original_url,
         short_url: foundUrl.short_url,
       });
-    } else {
-      const newUrl = await Url.create({ long_url: original_url });
-      return res.json({
-        original_url: newUrl.long_url,
-        short_url: newUrl.short_url,
-      });
     }
+
+    const lastUrl = await Url.findOne().sort({ short_url: -1 });
+    const newShortUrl = lastUrl ? lastUrl.short_url + 1 : 1;
+
+    const newUrl = await Url.create({ original_url, short_url: newShortUrl });
+
+    return res.json({
+      original_url: newUrl.original_url,
+      short_url: newUrl.short_url,
+    });
   })
 );
 
@@ -118,9 +122,10 @@ app.get(
 
     const foundUrl = await Url.findOne({ short_url: shortUrl });
     if (foundUrl) {
-      const { long_url } = foundUrl;
-      res.redirect(long_url);
+      return res.redirect(foundUrl.original_url);
     }
+
+    return res.status(404).json({ error: "No URL found for this short_url" });
   })
 );
 
