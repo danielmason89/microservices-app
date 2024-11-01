@@ -92,21 +92,18 @@ app.post(
     let original_url = req.body.url;
 
     if (!isValidUrl(original_url)) {
-      res.json({
-        error: "invalid url",
-      });
-      throw new Error("Invalid URL");
+      return res.json({ error: "invalid url" });
     }
 
     const foundUrl = await Url.findOne({ long_url: original_url });
     if (foundUrl) {
-      res.json({
+      return res.json({
         original_url: foundUrl.long_url,
         short_url: foundUrl.short_url,
       });
     } else {
       const newUrl = await Url.create({ long_url: original_url });
-      res.json({
+      return res.json({
         original_url: newUrl.long_url,
         short_url: newUrl.short_url,
       });
