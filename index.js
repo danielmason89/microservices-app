@@ -1,3 +1,5 @@
+import { fileURLToPath } from "url";
+import path from "path";
 import dotenv from "dotenv";
 import express from "express";
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
@@ -6,7 +8,9 @@ import cors from "cors";
 import expressAsyncHandler from "express-async-handler";
 import validator from "validator";
 import mongoose from "mongoose";
-import { nanoid } from "nanoid";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const port = process.env.PORT || 3000;
 
@@ -72,37 +76,6 @@ app.get("/api/whoami", (req, res) => {
 });
 
 // URL Shortener Microservice
-const urlSchema = mongoose.Schema({
-  original_url: {
-    type: String,
-    required: [true, "Please add the long url"],
-    unique: true,
-  },
-  short_url: {
-    type: Number,
-    unique: true,
-  },
-});
-
-urlSchema.pre("save", async (next) => {
-  if (!this.isNew) return next();
-
-  try {
-    const lastUrl = await this.constructor
-      .findOne()
-      .sort({ short_url: -1 })
-      .exec();
-    if (!lastUrl) {
-      this.short_url = 1;
-      next();
-    }
-    const nextShortUrl = lastUrl.short_url + 1;
-    this.short_url = nextShortUrl;
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
 
 app.post(
   "/api/shorturl",
