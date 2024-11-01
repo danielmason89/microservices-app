@@ -66,46 +66,58 @@ app.get("/api/whoami", (req, res) => {
 // URL Shortener Microservice
 let ShortURL = mongoose.model(
   "ShortURL",
-  new Schema({ short_url: String, original_url: String, suffix: String })
+  new Schema({
+    short_url: { type: Number, unique: true },
+    original_url: String,
+  })
 );
 
 app.post("/api/shorturl", async (req, res) => {
-  let client_requested_url = req.body.url;
-  if (
-    !client_requested_url.startsWith("http://") &&
-    !client_requested_url.startsWith("https://")
-  ) {
+  const client_requested_url = req.body.url;
+  if (!isValidUrl(clientRequestedUrl)) {
     return res.json({ error: "invalid url" });
   }
   try {
-    let suffix = nanoid();
+    let existingUrl = await ShortURL.findOne({
+      original_url: clientRequestedUrl,
+    });
+    if (existingUrl) {
+      return res.json({
+        original_url: existingUrl.original_url,
+        short_url: existingUrl.short_url,
+      });
+    }
 
-    let newURL = new ShortURL({
-      short_url: `${req.protocol}://${req.get("host")}/api/shorturl/${suffix}`,
-      original_url: client_requested_url,
-      suffix: suffix,
+    const newShortURL = await ShortURL.create({
+      short_url: nanoid(6), // You could alternatively increment an integer or generate a unique sequence
+      original_url: clientRequestedUrl,
     });
 
-    newURL.save();
-
     res.json({
-      saved: true,
-      short_url: newURL.short_url,
-      original_url: newURL.original_url,
-      suffix: newURL.suffix,
+      original_url: newShortURL.original_url,
+      short_url: newShortURL.short_url,
     });
   } catch (error) {
     console.error("Error handling /api/shorturl:", error);
-    res.status(500).json({ error: "invalid url" });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-app.get("/api/shorturl/:suffix", (req, res) => {
-  let userGeneratedSuffix = req.params.suffix;
-  ShortURL.find({ suffix: userGeneratedSuffix }).then((foundUrls) => {
-    let urlForDirect = foundUrls[0];
-    res.redirect(urlForDirect.original_url);
-  });
+app.get("/api/shorturl/:short_url", async (req, res) => {
+  try {
+    const shortUrlCode = req.params.short_url;
+
+    // Find the original URL based on the short_url
+    const foundUrl = await ShortURL.findOne({ short_url: shortUrlCode });
+    if (foundUrl) {
+      res.redirect(foundUrl.original_url);
+    } else {
+      res.status(404).json({ error: "No URL found" });
+    }
+  } catch (error) {
+    console.error("Error handling /api/shorturl/:short_url:", error);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 // Timestamp Microservice
