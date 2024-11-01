@@ -89,25 +89,24 @@ app.get("/api/whoami", (req, res) => {
 app.post(
   "/api/shorturl",
   expressAsyncHandler(async (req, res) => {
-    const original_url = req.body.url;
+    const { url: original_url } = req.body;
 
+    // Validate the URL
     if (!isValidUrl(original_url)) {
       return res.json({ error: "invalid url" });
     }
 
-    const foundUrl = await Url.findOne({ original_url });
-    if (foundUrl) {
+    // Check if the URL already exists
+    const existingUrl = await Url.findOne({ original_url });
+    if (existingUrl) {
       return res.json({
-        original_url: foundUrl.original_url,
-        short_url: foundUrl.short_url,
+        original_url: existingUrl.original_url,
+        short_url: existingUrl.short_url,
       });
     }
 
-    const lastUrl = await Url.findOne().sort({ short_url: -1 });
-    const newShortUrl = lastUrl ? lastUrl.short_url + 1 : 1;
-
-    const newUrl = await Url.create({ original_url, short_url: newShortUrl });
-
+    // Create a new short URL
+    const newUrl = await Url.create({ original_url });
     return res.json({
       original_url: newUrl.original_url,
       short_url: newUrl.short_url,
@@ -118,14 +117,14 @@ app.post(
 app.get(
   "/api/shorturl/:shortUrl",
   expressAsyncHandler(async (req, res) => {
-    const shortUrl = Number(req.params.shortUrl);
+    const shortUrl = parseInt(req.params.shortUrl);
 
     const foundUrl = await Url.findOne({ short_url: shortUrl });
     if (foundUrl) {
       return res.redirect(foundUrl.original_url);
     }
 
-    return res.status(404).json({ error: "No URL found for this short_url" });
+    res.status(404).json({ error: "No URL found for this short_url" });
   })
 );
 
@@ -139,25 +138,24 @@ app.get("/api/", (req, res) => {
 });
 
 app.get("/api/:date_string", (req, res) => {
-  let dateString = req.params.date_string;
+  const dateString = req.params.date_string;
+  const isUnixTimestamp = !isNaN(dateString) && parseInt(dateString) > 10000;
 
-  if (!isNaN(dateString) && parseInt(dateString) > 10000) {
-    let unixTime = new Date(parseInt(dateString));
-    res.json({
-      unix: unixTime.getTime(),
-      utc: unixTime.toUTCString(),
-    });
+  let date;
+  if (isUnixTimestamp) {
+    date = new Date(parseInt(dateString));
   } else {
-    let passedInValue = new Date(dateString);
-    if (passedInValue == "Invalid Date") {
-      res.json({ error: "Invalid Date" });
-    } else {
-      res.json({
-        unix: passedInValue.getTime(),
-        utc: passedInValue.toUTCString(),
-      });
-    }
+    date = new Date(dateString);
   }
+
+  if (isNaN(date.getTime())) {
+    return res.json({ error: "Invalid Date" });
+  }
+
+  res.json({
+    unix: date.getTime(),
+    utc: date.toUTCString(),
+  });
 });
 
 // Listen on port set in environment variable or default to 3000
