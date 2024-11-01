@@ -32,4 +32,5 @@ urlSchema.pre("save", async (next) => {
   }
 });
 
-module.exports = mongoose.model("Url", urlSchema);
+const Url = mongoose.model("Url", urlSchema);
+export default Url;
