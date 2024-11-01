@@ -25,10 +25,7 @@ mongoose
     bufferCommands: false,
   })
   .then(() => console.log("Connected to MongoDB"))
-  .catch(
-    (err) => console.error("Failed to connect to MongoDB:", err),
-    process.exit(1)
-  );
+  .catch((err) => console.error("Failed to connect to MongoDB:", err));
 
 const isValidUrl = (url) => {
   return validator.isURL(url, {
