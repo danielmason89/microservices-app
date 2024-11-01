@@ -8,6 +8,7 @@ import cors from "cors";
 import expressAsyncHandler from "express-async-handler";
 import validator from "validator";
 import mongoose from "mongoose";
+import Url from "./models/urlModel.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
