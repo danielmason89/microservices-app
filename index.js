@@ -25,7 +25,10 @@ mongoose
     bufferCommands: false,
   })
   .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("Failed to connect to MongoDB:", err));
+  .catch(
+    (err) => console.error("Failed to connect to MongoDB:", err),
+    process.exit(1)
+  );
 
 const isValidUrl = (url) => {
   return validator.isURL(url, {
@@ -82,24 +85,30 @@ app.get("/api/whoami", (req, res) => {
 app.post(
   "/api/shorturl",
   expressAsyncHandler(async (req, res) => {
-    let original_url = req.body.url;
+    try {
+      const original_url = req.body.url;
 
-    if (!isValidUrl(original_url)) {
-      return res.json({ error: "invalid url" });
-    }
+      if (!isValidUrl(original_url)) {
+        return res.status(400).json({ error: "invalid url" });
+      }
 
-    const foundUrl = await Url.findOne({ original_url });
-    if (foundUrl) {
+      let foundUrl = await Url.findOne({ original_url });
+      if (foundUrl) {
+        return res.json({
+          original_url: foundUrl.original_url,
+          short_url: foundUrl.short_url,
+        });
+      }
+
+      const newUrl = await Url.create({ original_url });
       return res.json({
-        original_url: foundUrl.original_url,
-        short_url: foundUrl.short_url,
+        original_url: newUrl.original_url,
+        short_url: newUrl.short_url,
       });
+    } catch (err) {
+      console.error("Error in POST /api/shorturl:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
-    const newUrl = await Url.create({ original_url });
-    return res.json({
-      original_url: newUrl.original_url,
-      short_url: newUrl.short_url,
-    });
   })
 );
 
