@@ -70,16 +70,12 @@ let ShortURL = mongoose.model(
 );
 
 app.post("/api/shorturl", async (req, res) => {
+  const client_requested_url = req.body.url;
+  const urlPattern = /^(https?:\/\/)/;
+  if (!urlPattern.test(client_requested_url)) {
+    return res.json({ error: "invalid url" });
+  }
   try {
-    let client_requested_url = req.body.url;
-
-    if (
-      !client_requested_url.startsWith("http://") &&
-      !client_requested_url.startsWith("https://")
-    ) {
-      return res.json({ error: "invalid url" });
-    }
-
     let suffix = nanoid();
 
     let newURL = new ShortURL({
@@ -91,10 +87,8 @@ app.post("/api/shorturl", async (req, res) => {
     newURL.save();
 
     res.json({
-      saved: true,
-      short_url: newURL.short_url,
       original_url: newURL.original_url,
-      suffix: newURL.suffix,
+      short_url: suffix,
     });
   } catch (error) {
     console.error("Error handling /api/shorturl:", error);
@@ -104,7 +98,7 @@ app.post("/api/shorturl", async (req, res) => {
 
 app.get("/api/shorturl/:suffix", async (req, res) => {
   try {
-    let userGeneratedSuffix = req.params.suffix;
+    const userGeneratedSuffix = req.params.suffix;
     const foundUrl = await ShortURL.findOne({ suffix: userGeneratedSuffix });
     if (!foundUrl) {
       return res.status(404).json({ error: "No URL found" });
