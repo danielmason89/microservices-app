@@ -74,33 +74,28 @@ let ShortURL = mongoose.model(
 );
 
 app.post("/api/shorturl", async (req, res) => {
-  try {
-    let client_requested_url = req.body.url;
+  let client_requested_url = req.body.url;
 
-    if (
-      !client_requested_url.startsWith("http://") &&
-      !client_requested_url.startsWith("https://")
-    ) {
-      return res.json({ error: "invalid url" });
-    }
-
-    let suffix = nanoid();
-
-    let newURL = new ShortURL({
-      original_url: client_requested_url,
-      suffix: suffix,
-    });
-
-    await newURL.save();
-
-    res.json({
-      short_url: suffix,
-      original_url: newURL.original_url,
-    });
-  } catch (error) {
-    console.error("Error handling /api/shorturl:", error);
-    res.status(500).json({ error: "invalid url" });
+  if (
+    !client_requested_url.startsWith("http://") &&
+    !client_requested_url.startsWith("https://")
+  ) {
+    return res.json({ error: "invalid url" });
   }
+
+  let suffix = nanoid();
+
+  let newURL = new ShortURL({
+    original_url: client_requested_url,
+    suffix: suffix,
+  });
+
+  newURL.save();
+
+  res.json({
+    short_url: suffix,
+    original_url: newURL.original_url,
+  });
 });
 
 app.get("/api/shorturl/:suffix", async (req, res) => {
