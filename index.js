@@ -109,7 +109,7 @@ app.get("/api/shorturl/:suffix", async (req, res) => {
     if (!foundUrl) {
       return res.status(404).json({ error: "No URL found" });
     }
-    res.redirect(urlForDirect.original_url);
+    res.redirect(foundUrl.original_url);
   } catch (error) {
     console.error("Error handling /api/shorturl:", error);
     res.status(500).json({ error: "invalid url" });
