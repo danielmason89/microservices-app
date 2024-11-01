@@ -24,9 +24,9 @@ mongoose
 
 const port = process.env.PORT || 3000;
 const corsOptions = {
-  origin: ["https://www.freecodecamp.org"],
-  optionsSuccessStatus: 200, // For legacy browser support
-}; // some legacy browsers choke on 204
+  origin: "*",
+  optionsSuccessStatus: 200,
+};
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -91,12 +91,10 @@ app.post("/api/shorturl", async (req, res) => {
       suffix: suffix,
     });
 
-    newURL.save();
+    await newURL.save();
 
     res.json({
-      saved: true,
-      saved: true,
-      short_url: `${suffix}`,
+      short_url: suffix,
       original_url: newURL.original_url,
     });
   } catch (error) {
