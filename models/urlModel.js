@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const urlSchema = mongoose.Schema({
-  original_url: {
+  client_requested_url: {
     type: String,
     required: [true, "Please add the long url"],
     unique: true,
@@ -12,7 +12,7 @@ const urlSchema = mongoose.Schema({
   },
 });
 
-urlSchema.pre("save", async (next) => {
+urlSchema.pre("save", async function (next) {
   if (!this.isNew) return next();
 
   try {
@@ -20,12 +20,7 @@ urlSchema.pre("save", async (next) => {
       .findOne()
       .sort({ short_url: -1 })
       .exec();
-    if (!lastUrl) {
-      this.short_url = 1;
-      next();
-    }
-    const nextShortUrl = lastUrl.short_url + 1;
-    this.short_url = nextShortUrl;
+    this.short_url = lastUrl ? lastUrl.short_url + 1 : 1;
     next();
   } catch (err) {
     next(err);
