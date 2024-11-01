@@ -3,12 +3,9 @@ import mongoose from "mongoose";
 const urlSchema = mongoose.Schema({
   original_url: {
     type: String,
-    required: [true, "Please add the long url"],
-    unique: true,
   },
   short_url: {
     type: Number,
-    unique: true,
   },
 });
 
