@@ -16,9 +16,11 @@
     "dotenv": "^16.4.5",
     "ejs": "^3.1.9",
     "express": "^4.15.2",
+    "express-async-handler": "^1.2.0",
     "mongodb": "^5.9.2",
     "mongoose": "^7.8.2",
-    "nanoid": "^5.0.8"
+    "nanoid": "^5.0.8",
+    "validator": "^13.12.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.7",

@@ -1,15 +1,15 @@
-import path from "path";
-import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import express from "express";
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC
 import cors from "cors";
-import mongoose, { Schema } from "mongoose";
+import expressAsyncHandler from "express-async-handler";
+import validator from "validator";
+import mongoose from "mongoose";
 import { nanoid } from "nanoid";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const port = process.env.PORT || 3000;
+
 dotenv.config();
 const app = express();
 
@@ -22,7 +22,15 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Failed to connect to MongoDB:", err));
 
-const port = process.env.PORT || 3000;
+const isValidUrl = (url) => {
+  return validator.isURL(url, {
+    protocols: ["http", "https", "ftp"],
+    require_tld: false,
+    require_protocol: true,
+    allow_query_parts: true,
+  });
+};
+
 app.use(cors({ optionsSuccessStatus: 200 })); // some legacy browsers choke on 204
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -64,57 +72,80 @@ app.get("/api/whoami", (req, res) => {
 });
 
 // URL Shortener Microservice
-let ShortURL = mongoose.model(
-  "ShortURL",
-  new Schema({ short_url: String, original_url: String, suffix: String })
-);
+const urlSchema = mongoose.Schema({
+  original_url: {
+    type: String,
+    required: [true, "Please add the long url"],
+    unique: true,
+  },
+  short_url: {
+    type: Number,
+    unique: true,
+  },
+});
 
-app.post("/api/shorturl", async (req, res) => {
+urlSchema.pre("save", async (next) => {
+  if (!this.isNew) return next();
+
   try {
+    const lastUrl = await this.constructor
+      .findOne()
+      .sort({ short_url: -1 })
+      .exec();
+    if (!lastUrl) {
+      this.short_url = 1;
+      next();
+    }
+    const nextShortUrl = lastUrl.short_url + 1;
+    this.short_url = nextShortUrl;
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post(
+  "/api/shorturl",
+  expressAsyncHandler(async (req, res) => {
     let client_requested_url = req.body.url;
 
-    if (
-      !client_requested_url.startsWith("http://") &&
-      !client_requested_url.startsWith("https://")
-    ) {
-      return res.json({ error: "invalid url" });
+    if (!isValidUrl(client_requested_url)) {
+      res.json({
+        error: "invalid url",
+      });
+      throw new Error("Invalid URL");
     }
 
-    let suffix = nanoid();
-
-    let newURL = new ShortURL({
-      short_url: `${req.protocol}://${req.get("host")}/api/shorturl/${suffix}`,
-      original_url: client_requested_url,
-      suffix: suffix,
-    });
-
-    newURL.save();
-
-    res.json({
-      saved: true,
-      short_url: newURL.short_url,
-      original_url: newURL.original_url,
-      suffix: newURL.suffix,
-    });
-  } catch (error) {
-    console.error("Error handling /api/shorturl:", error);
-    res.status(500).json({ error: "invalid url" });
-  }
-});
-
-app.get("/api/shorturl/:suffix", async (req, res) => {
-  try {
-    let userGeneratedSuffix = req.params.suffix;
-    const foundUrl = await ShortURL.findOne({ suffix: userGeneratedSuffix });
-    if (!foundUrl) {
-      return res.status(404).json({ error: "No URL found" });
+    const foundUrl = await Url.findOne({ long_url: client_requested_url });
+    if (foundUrl) {
+      res.json({
+        original_url: foundUrl.original_url,
+        short_url: foundUrl.short_url,
+      });
+    } else {
+      const newUrl = await Url.create({
+        long_url: original_url,
+      });
+      res.json({
+        original_url: newURL.original_url,
+        short_url: newURL.short_url,
+      });
     }
-    res.redirect(urlForDirect.original_url);
-  } catch (error) {
-    console.error("Error handling /api/shorturl:", error);
-    res.status(500).json({ error: "invalid url" });
-  }
-});
+  })
+);
+
+app.get(
+  "/api/shorturl/:shortUrl",
+  expressAsyncHandler(async (req, res) => {
+    const shortUrl = Number(req.params.shortUrl);
+
+    const foundUrl = await Url.findOne({ short_url: shortUrl });
+    if (foundUrl) {
+      const { long_url } = foundUrl;
+      res.redirect(long_url);
+    }
+  })
+);
 
 // Timestamp Microservice
 app.get("/api/", (req, res) => {
