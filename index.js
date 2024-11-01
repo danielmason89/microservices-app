@@ -36,6 +36,7 @@ const isValidUrl = (url) => {
   });
 };
 
+app.use(cors({ origin: "https://www.freecodecamp.org" }));
 app.use(cors({ optionsSuccessStatus: 200 })); // some legacy browsers choke on 204
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -89,13 +90,13 @@ app.post(
 
     const foundUrl = await Url.findOne({ original_url });
     if (foundUrl) {
-      res.json({
+      return res.json({
         original_url: foundUrl.original_url,
         short_url: foundUrl.short_url,
       });
     }
     const newUrl = await Url.create({ original_url });
-    res.json({
+    return res.json({
       original_url: newUrl.original_url,
       short_url: newUrl.short_url,
     });
@@ -110,9 +111,8 @@ app.get(
     const foundUrl = await Url.findOne({ short_url: shortUrl });
     if (foundUrl) {
       return res.redirect(foundUrl.original_url);
-    } else {
-      return res.status(404).json({ error: "URL not found" });
     }
+    return res.status(404).json({ error: "URL not found" });
   })
 );
 
