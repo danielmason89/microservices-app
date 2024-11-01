@@ -84,10 +84,7 @@ app.post(
     let original_url = req.body.url;
 
     if (!isValidUrl(original_url)) {
-      res.json({
-        error: "invalid url",
-      });
-      throw new Error("Invalid URL");
+      return res.json({ error: "invalid url" });
     }
 
     const foundUrl = await Url.findOne({ original_url });
@@ -96,13 +93,12 @@ app.post(
         original_url: foundUrl.original_url,
         short_url: foundUrl.short_url,
       });
-    } else {
-      const newUrl = await Url.create({ original_url });
-      res.json({
-        original_url: newUrl.original_url,
-        short_url: newUrl.short_url,
-      });
     }
+    const newUrl = await Url.create({ original_url });
+    res.json({
+      original_url: newUrl.original_url,
+      short_url: newUrl.short_url,
+    });
   })
 );
 
@@ -113,9 +109,9 @@ app.get(
 
     const foundUrl = await Url.findOne({ short_url: shortUrl });
     if (foundUrl) {
-      res.redirect(foundUrl.original_url);
+      return res.redirect(foundUrl.original_url);
     } else {
-      res.status(404).json({ error: "URL not found" });
+      return res.status(404).json({ error: "URL not found" });
     }
   })
 );
