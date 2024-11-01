@@ -23,7 +23,11 @@ mongoose
   .catch((err) => console.error("Failed to connect to MongoDB:", err));
 
 const port = process.env.PORT || 3000;
-app.use(cors({ optionsSuccessStatus: 200 })); // some legacy browsers choke on 204
+const corsOptions = {
+  origin: "https://www.freecodecamp.org",
+  optionsSuccessStatus: 200, // For legacy browser support
+}; // some legacy browsers choke on 204
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
