@@ -22,11 +22,6 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Failed to connect to MongoDB:", err));
 
-// const { MongoClient } = require("mongodb");
-// const client = new MongoClient(process.env.DB_URI);
-// const db = client.db("urlshortener");
-// const urls = db.collection("urls");
-
 const port = process.env.PORT || 3000;
 app.use(cors({ optionsSuccessStatus: 200 })); // some legacy browsers choke on 204
 app.use(express.json());
@@ -75,8 +70,14 @@ let ShortURL = mongoose.model(
 );
 
 app.post("/api/shorturl", async (req, res) => {
+  let client_requested_url = req.body.url;
+  if (
+    !client_requested_url.startsWith("http://") &&
+    !client_requested_url.startsWith("https://")
+  ) {
+    return res.json({ error: "invalid url" });
+  }
   try {
-    let client_requested_url = req.body.url;
     let suffix = nanoid();
 
     let newURL = new ShortURL({
@@ -99,12 +100,36 @@ app.post("/api/shorturl", async (req, res) => {
   }
 });
 
-app.get("/api/shorturl/:suffix", (req, res) => {
-  let userGeneratedSuffix = req.params.suffix;
-  ShortURL.find({ suffix: userGeneratedSuffix }).then((foundUrls) => {
-    let urlForDirect = foundUrls[0];
-    res.redirect(urlForDirect.original_url);
-  });
+app.get("/api/shorturl/:suffix", async (req, res) => {
+  try {
+    let userGeneratedSuffix = req.params.suffix;
+    let foundUrl = await ShortURL.findOne({ suffix: userGeneratedSuffix });
+
+    if (foundUrl) {
+      // Render an intermediate HTML page with a link that opens in a new tab
+      res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Redirecting...</title>
+        </head>
+        <body>
+          <p>Redirecting you to <a href="${foundUrl.original_url}" target="_blank">your destination</a>...</p>
+          <script>
+            window.open("${foundUrl.original_url}", "_blank");
+          </script>
+        </body>
+        </html>
+      `);
+    } else {
+      res.status(404).json({ error: "URL not found" });
+    }
+  } catch (error) {
+    console.error("Error handling /api/shorturl/:suffix:", error);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 // Timestamp Microservice
