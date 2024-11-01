@@ -72,22 +72,27 @@ app.get("/api/whoami", (req, res) => {
 // URL Shortener Microservice
 let ShortURL = mongoose.model(
   "ShortURL",
-  new Schema({ short_url: String, original_url: String, suffix: String })
+  new Schema({ original_url: String, suffix: String })
 );
+
+const isValidUrl = (url) => {
+  const urlRegex = /^https?:\/\/.+\..+/;
+  return urlRegex.test(url);
+};
 
 app.post("/api/shorturl", async (req, res) => {
   let client_requested_url = req.body.url;
 
-  if (!/^https?:\/\/.+\..+/.test(client_requested_url)) {
+  if (!isValidUrl(client_requested_url)) {
     return res.json({ error: "invalid url" });
   }
 
-  let suffix = nanoid();
+  const suffix = nanoid();
   const newURL = new ShortURL({ original_url: client_requested_url, suffix });
 
   try {
     await newURL.save();
-    res.json({ short_url: suffix, original_url: newURL.original_url });
+    res.json({ original_url: newURL.original_url, short_url: newURL.suffix });
   } catch (error) {
     console.error("Error saving URL:", error);
     res.status(500).json({ error: "server error" });
@@ -95,15 +100,20 @@ app.post("/api/shorturl", async (req, res) => {
 });
 
 app.get("/api/shorturl/:suffix", async (req, res) => {
+  const userGeneratedSuffix = req.params.suffix;
+
   try {
     const foundUrl = await ShortURL.findOne({ suffix: userGeneratedSuffix });
+
     if (!foundUrl) {
       return res.status(404).json({ error: "No URL found" });
     }
+
+    // Redirect to original URL
     res.redirect(foundUrl.original_url);
   } catch (error) {
     console.error("Error handling /api/shorturl:", error);
-    res.status(500).json({ error: "invalid url" });
+    res.status(500).json({ error: "server error" });
   }
 });
 
