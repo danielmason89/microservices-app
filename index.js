@@ -89,17 +89,22 @@ app.post("/api/shorturl", async (req, res) => {
       suffix: newURL.suffix,
     });
   } catch (error) {
-    console.error("Error handling /api/shorturl:", error);
+    console.error("Error handling /api/short_url:", error);
     res.status(500).json({ error: "invalid url" });
   }
 });
 
 app.get("/api/shorturl/:suffix", (req, res) => {
-  let userGeneratedSuffix = req.params.suffix;
-  ShortURL.find({ suffix: userGeneratedSuffix }).then((foundUrls) => {
-    let urlForDirect = foundUrls[0];
-    res.redirect(urlForDirect.original_url);
-  });
+  try {
+    let userGeneratedSuffix = req.params.suffix;
+    ShortURL.find({ suffix: userGeneratedSuffix }).then((foundUrls) => {
+      let urlForDirect = foundUrls[0];
+      res.redirect(urlForDirect.original_url);
+    });
+  } catch (error) {
+    console.error("Error handling /api/short_url:", error);
+    res.status(500).json({ error: "invalid url" });
+  }
 });
 
 // Timestamp Microservice
