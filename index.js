@@ -43,10 +43,11 @@ const isValidUrl = (url) => {
 };
 
 connectDB();
-app.use(cors({ origin: "https://www.freecodecamp.org" }));
-app.use(cors({ optionsSuccessStatus: 200 })); // some legacy browsers choke on 204
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static(`${process.cwd()}/public`));
+// app.use(cors({ origin: "https://www.freecodecamp.org" }));
+// app.use(cors({ optionsSuccessStatus: 200 })); // some legacy browsers choke on 204
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static("public"));
