@@ -87,7 +87,6 @@ app.post("/api/shorturl", async (req, res) => {
     let suffix = nanoid();
 
     let newURL = new ShortURL({
-      short_url: `${req.protocol}://${req.get("host")}/api/shorturl/${suffix}`,
       original_url: client_requested_url,
       suffix: suffix,
     });
@@ -96,9 +95,9 @@ app.post("/api/shorturl", async (req, res) => {
 
     res.json({
       saved: true,
-      short_url: newURL.short_url,
+      saved: true,
+      short_url: `${suffix}`,
       original_url: newURL.original_url,
-      suffix: newURL.suffix,
     });
   } catch (error) {
     console.error("Error handling /api/shorturl:", error);
