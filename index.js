@@ -18,14 +18,20 @@ const port = process.env.PORT || 3000;
 dotenv.config();
 const app = express();
 
-mongoose
-  .connect(process.env.DB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    bufferCommands: false,
-  })
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("Failed to connect to MongoDB:", err));
+const connectDB = async () => {
+  try {
+    mongoose
+      .connect(process.env.DB_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        bufferCommands: false,
+      })
+      .then(() => console.log("Connected to MongoDB"))
+      .catch((err) => console.error("Failed to connect to MongoDB:", err));
+  } catch (err) {
+    console.error(err.response.data.message);
+  }
+};
 
 const isValidUrl = (url) => {
   return validator.isURL(url, {
@@ -36,10 +42,11 @@ const isValidUrl = (url) => {
   });
 };
 
+connectDB();
 app.use(cors({ origin: "https://www.freecodecamp.org" }));
 app.use(cors({ optionsSuccessStatus: 200 })); // some legacy browsers choke on 204
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/public", express.static(`${process.cwd()}/public`));
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static("public"));
@@ -78,33 +85,30 @@ app.get("/api/whoami", (req, res) => {
 });
 
 // URL Shortener Microservice
-
 app.post(
   "/api/shorturl",
   expressAsyncHandler(async (req, res) => {
-    try {
-      const original_url = req.body.url;
+    let original_url = req.body.url;
 
-      if (!isValidUrl(original_url)) {
-        return res.status(400).json({ error: "invalid url" });
-      }
+    if (!isValidUrl(original_url)) {
+      res.json({
+        error: "invalid url",
+      });
+      throw new Error("Invalid URL");
+    }
 
-      let foundUrl = await Url.findOne({ original_url });
-      if (foundUrl) {
-        return res.json({
-          original_url: foundUrl.original_url,
-          short_url: foundUrl.short_url,
-        });
-      }
-
-      const newUrl = await Url.create({ original_url });
-      return res.json({
-        original_url: newUrl.original_url,
+    const foundUrl = await Url.findOne({ long_url: original_url });
+    if (foundUrl) {
+      res.json({
+        original_url: foundUrl.long_url,
+        short_url: foundUrl.short_url,
+      });
+    } else {
+      const newUrl = await Url.create({ long_url: original_url });
+      res.json({
+        original_url: newUrl.long_url,
         short_url: newUrl.short_url,
       });
-    } catch (err) {
-      console.error("Error in POST /api/shorturl:", err);
-      return res.status(500).json({ error: "Internal Server Error" });
     }
   })
 );
@@ -116,9 +120,9 @@ app.get(
 
     const foundUrl = await Url.findOne({ short_url: shortUrl });
     if (foundUrl) {
-      return res.redirect(foundUrl.original_url);
+      const { long_url } = foundUrl;
+      res.redirect(long_url);
     }
-    return res.status(404).json({ error: "URL not found" });
   })
 );
 

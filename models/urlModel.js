@@ -1,20 +1,30 @@
 import mongoose from "mongoose";
 
 const urlSchema = mongoose.Schema({
-  original_url: {
+  long_url: {
     type: String,
     required: [true, "Please add the long URL"],
+    unique: true,
   },
   short_url: {
     type: Number,
+    unique: true,
   },
 });
 
 urlSchema.pre("save", async function (next) {
+  if (!this.isNew) return next();
   try {
-    if (!this.isNew) return next();
-    const lastUrl = await this.constructor.findOne().sort({ short_url: -1 });
-    this.short_url = lastUrl ? lastUrl.short_url + 1 : 1;
+    const lastUrl = await this.constructor
+      .findOne()
+      .sort({ short_url: -1 })
+      .exec();
+    if (!lastUrl) {
+      this.short_url = 1;
+      next();
+    }
+    const nextShortUrl = lastUrl.short_url + 1;
+    this.short_url = nextShortUrl;
     next();
   } catch (err) {
     next(err);
