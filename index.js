@@ -24,7 +24,7 @@ mongoose
 
 const port = process.env.PORT || 3000;
 const corsOptions = {
-  origin: "https://www.freecodecamp.org",
+  origin: ["https://www.freecodecamp.org"],
   optionsSuccessStatus: 200, // For legacy browser support
 }; // some legacy browsers choke on 204
 app.use(cors(corsOptions));
@@ -74,14 +74,15 @@ let ShortURL = mongoose.model(
 );
 
 app.post("/api/shorturl", async (req, res) => {
-  if (
-    !client_requested_url.startsWith("http://") &&
-    !client_requested_url.startsWith("https://")
-  ) {
-    return res.json({ error: "invalid url" });
-  }
   try {
     let client_requested_url = req.body.url;
+
+    if (
+      !client_requested_url.startsWith("http://") &&
+      !client_requested_url.startsWith("https://")
+    ) {
+      return res.json({ error: "invalid url" });
+    }
 
     let suffix = nanoid();
 
