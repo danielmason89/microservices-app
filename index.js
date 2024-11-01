@@ -91,7 +91,7 @@ app.post("/api/shorturl", async (req, res) => {
       suffix: suffix,
     });
 
-    await newURL.save();
+    newURL.save();
 
     res.json({
       saved: true,
