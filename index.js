@@ -78,7 +78,7 @@ const ExerciseUserSchema = mongoose.Schema({
 
 const ExerciseUser = mongoose.model("exerciseUser", ExerciseUserSchema);
 
-app.post("/api/new-users/", async (req, res) => {
+app.post("/api/users", async (req, res) => {
   console.log("accessing post request");
 
   try {
@@ -89,6 +89,7 @@ app.post("/api/new-users/", async (req, res) => {
     });
 
     await doc.save();
+
     res.json({
       saved: true,
       username: doc.username,
