@@ -28,20 +28,26 @@
             <form action="/api/users" id="user-form" method="post">
                 <h2>Create a New User</h2>
                 <p><code>POST /api/users</code></p>
-                <section class="form-group">
-                    <input id="username" type="text" name="username" placeholder="username" class="form-control" />
-                    <input type="submit" value="Submit" class="btn btn-bloc btn-primary my-4" />
+                <section class="form-group container-fluid">
+                    <input id="username" type="text" name="username" placeholder="username"
+                        class="form-control container-fluid" />
+                    <input type="submit" value="Submit"
+                        class="btn btn-bloc btn-primary my-2 d-grid gap-2 col-4 mx-auto" />
                 </section>
             </form>
             <form action="/api/users/:_id/exercises" id="exercise-form" method="post">
                 <h2>Add exercises</h2>
                 <p><code>POST /api/users/:_id/exercises</code></p>
-                <section class="form-group">
-                    <input id="uid" type="text" name=":_id" placeholder=":_id" class="form-control" />
-                    <input id="desc" type="text" name="description" placeholder="description*" class="form-control" />
-                    <input id="dur" type="text" name="duration" placeholder="duration* (mins.)" class="form-control" />
-                    <input id="date" type="text" name="date" placeholder="date (yyyy-mm-dd)" class="form-control" />
-                    <input type="submit" value="Submit" class="btn btn-bloc btn-primary my-4" />
+                <section class="form-group container-fluid">
+                    <input id="uid" type="text" name=":_id" placeholder=":_id" class="form-control container-fluid" />
+                    <input id="desc" type="text" name="description" placeholder="description*"
+                        class="form-control container-fluid" />
+                    <input id="dur" type="text" name="duration" placeholder="duration* (mins.)"
+                        class="form-control container-fluid" />
+                    <input id="date" type="text" name="date" placeholder="date (yyyy-mm-dd)"
+                        class="form-control container-fluid" />
+                    <input type="submit" value="Submit"
+                        class="btn btn-bloc btn-primary my-2 d-grid gap-2 col-4 mx-auto" />
                 </section>
             </form>
         </div>

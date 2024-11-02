@@ -162,7 +162,33 @@ app.get("/api/users", async (req, res) => {
   }
 });
 
-app.get("/api/users/:_id/logs", async (req, res) => {});
+app.get("/api/users/:_id/logs", async (req, res) => {
+  try {
+    const user = await User.findById(req.params._id);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const formattedLog = user.log.map((exercise) => ({
+      description: exercise.description,
+      duration: exercise.duration,
+      date: new Date(exercise.date).toDateString(),
+    }));
+
+    const responseObject = {
+      _id: user._id,
+      username: user.username,
+      count: user.log.length,
+      log: formattedLog,
+    };
+
+    res.json(responseObject);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to retrieve exercise logs" });
+  }
+});
 
 // Request Header Parser Microservice
 app.get("/api/whoami/", (req, res) => {
