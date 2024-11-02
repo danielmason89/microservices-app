@@ -71,7 +71,7 @@ app.get("/api/hello", (req, res) => {
 });
 
 // Exercise Tracker
-let ExerciseUserSchema = mongoose.Schema({
+const ExerciseUserSchema = mongoose.Schema({
   _id: { type: String },
   username: { type: String, unique: true },
 });
@@ -101,15 +101,9 @@ app.post("/api/new-users/", async (req, res) => {
 });
 
 app.get("/api/users", async (req, res) => {
-  try {
-    const exerciseUsers = await ExerciseUser.find({});
-    res.json({
-      users: exerciseUsers,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to retrieve users" });
-  }
+  const exerciseUsers = await ExerciseUser.find({}, "username, _id");
+  console.log(exerciseUsers, "exerciseUsers");
+  return res.json(exerciseUsers);
 });
 
 // Request Header Parser Microservice
