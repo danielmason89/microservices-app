@@ -5,10 +5,8 @@ import express from "express";
 import cors from "cors";
 import expressAsyncHandler from "express-async-handler";
 import validator from "validator";
-import mongoose, { Schema } from "mongoose";
+import mongoose from "mongoose";
 import Url from "./models/urlModel.js";
-import { nanoid } from "nanoid";
-import { type } from "os";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -64,10 +62,19 @@ app.get("/exercise-tracker", (req, res) => {
   res.sendFile(__dirname + "/views/exercise-tracker.html");
 });
 
+app.get("/file-metadata", (req, res) => {
+  res.sendFile(__dirname + "/views/file-metadata.html");
+});
+
 // test API endpoint...
 app.get("/api/hello", (req, res) => {
   console.log({ greeting: "hello API" });
   res.json({ greeting: "hello API" });
+});
+
+// File Metadata Microservice
+app.get('/', function (req, res) {
+  res.sendFile(process.cwd() + '/views/index.html');
 });
 
 // Exercise Tracker
@@ -202,7 +209,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
         return sessionDate >= fromDate && sessionDate <= toDate;
       });
     }
-    
+
     if (req.query.limit) {
       responseObject.log = responseObject.log.slice(0, req.query.limit);
     }

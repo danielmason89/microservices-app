@@ -6,11 +6,10 @@
 body {
   font-family: "Roboto", sans-serif;
   margin: 25px;
-  font-size: 16px;
+  font-size: 1rem;
   color: #222;
   background-color: #fafafa;
   text-align: center;
-  line-height: 1.4em;
 }
 
 main {
@@ -20,7 +19,6 @@ main {
 
 .container {
   padding: 0;
-  margin-top: 40px;
 }
 
 h1 {
@@ -77,9 +75,10 @@ label {
 input {
   padding: 5px;
   display: block;
-  margin-bottom: 10px;
+  position: relative;
+  margin: 10px auto;
   width: 100%;
-  border: 1px solid rgba(40, 73, 163, 0.505);
+  border: 1px solid rgb(28, 106, 222);
   border-radius: 3px;
   font-size: 16px;
 }
@@ -99,11 +98,25 @@ input[type="submit"] {
 }
 
 input[type="submit"]:hover {
-  background-color: #4f2ea3;
+  background-color: #aca9b1;
+}
+
+input#button {
+  width: 230px;
 }
 
 code {
   font-family: monospace;
   font-size: 1.2em;
   padding: 2px;
+}
+
+.view {
+  position: relative;
+  margin: auto;
+  margin-top: 40px;
+  border: 1px solid #aaa;
+  padding: 20px;
+  width: 60%;
+  min-width: 400px;
 }
