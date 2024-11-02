@@ -75,12 +75,14 @@ app.get("/api/hello", (req, res) => {
 });
 
 // File Metadata Microservice
-app.post("/api/fileanalyse", multer().single("upfile"), (req, res) => {
+app.post("/api/fileanalyse", upload().single("upfile"), (req, res) => {
   try {
-    let responseObject = {};
-    responseObject["name"] = req.file.originalname;
-    responseObject["file"] = req.file.mimetype;
-    responseObject["size"] = req.file.size;
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    const responseObject = {
+      name: req.file.originalname,
+      type: req.file.mimetype,
+      size: req.file.size,
+    };
 
     res.json(responseObject);
   } catch (err) {
