@@ -88,7 +88,7 @@ app.post("/api/new-users/", async (req, res) => {
       _id: mongooseGeneratedID,
     });
 
-    await doc.save;
+    await doc.save();
     res.json({
       saved: true,
       username: doc.username,
@@ -101,9 +101,14 @@ app.post("/api/new-users/", async (req, res) => {
 });
 
 app.get("/api/users", async (req, res) => {
-  const exerciseUsers = await ExerciseUser.find({}, "username _id");
-  console.log(exerciseUsers, "exerciseUsers");
-  return res.json(exerciseUsers);
+  try {
+    const exerciseUsers = await ExerciseUser.find({}, "username _id");
+    console.log(exerciseUsers, "exerciseUsers");
+    return res.json(exerciseUsers);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to retrieve users" });
+  }
 });
 
 // Request Header Parser Microservice
