@@ -183,6 +183,30 @@ app.get("/api/users/:_id/logs", async (req, res) => {
       log: formattedLog,
     };
 
+    if (req.query.from || req.query.to) {
+      let fromDate = new Date(0);
+      let toDate = new Date();
+
+      if (req.query.from) {
+        fromDate = new Date(req.query.from);
+      }
+      if (req.query.to) {
+        toDate = new Date(req.query.to);
+      }
+
+      fromDate = fromDate.getTime();
+      toDate = toDate.getTime();
+
+      responseObject.log = responseObject.log.filter((session) => {
+        let sessionDate = new Date(session.date).getTime();
+        return sessionDate >= fromDate && sessionDate <= toDate;
+      });
+    }
+    
+    if (req.query.limit) {
+      responseObject.log = responseObject.log.slice(0, req.query.limit);
+    }
+
     res.json(responseObject);
   } catch (err) {
     console.error(err);
