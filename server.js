@@ -7,7 +7,9 @@ import expressAsyncHandler from "express-async-handler";
 import validator from "validator";
 import mongoose from "mongoose";
 import Url from "./models/urlModel.js";
+import multer from "multer";
 
+const upload = multer({ dest: "uploads/" });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const port = process.env.PORT || 3000;
@@ -73,8 +75,18 @@ app.get("/api/hello", (req, res) => {
 });
 
 // File Metadata Microservice
-app.get('/', function (req, res) {
-  res.sendFile(process.cwd() + '/views/index.html');
+app.post("/api/fileanalyse", multer().single("upfile"), (req, res) => {
+  try {
+    let responseObject = {};
+    responseObject["name"] = req.file.originalname;
+    responseObject["file"] = req.file.mimetype;
+    responseObject["size"] = req.file.size;
+
+    res.json(responseObject);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to upload file" });
+  }
 });
 
 // Exercise Tracker
