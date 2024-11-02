@@ -7,6 +7,7 @@ import expressAsyncHandler from "express-async-handler";
 import validator from "validator";
 import mongoose, { Schema } from "mongoose";
 import Url from "./models/urlModel.js";
+import { nanoid } from "nanoid";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -71,8 +72,37 @@ app.get("/api/hello", (req, res) => {
 
 // Exercise Tracker
 
+let ExerciseUserSchema = mongoose.Schema({
+  _id: String,
+  username: String,
+});
+
+const ExerciseUser = mongoose.model("exerciseUser", ExerciseUserSchema);
+
+app.post("/api/new-users/", async (req, res) => {
+  console.log("accessing post request");
+
+  try {
+    let mongooseGeneratedID = new mongoose.Types.ObjectId();
+    const doc = new ExerciseUser({
+      username: req.body.username,
+      _id: mongooseGeneratedID,
+    });
+
+    await doc.save;
+    res.json({
+      saved: true,
+      username: doc.username,
+      _id: doc["_id"],
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to save user" });
+  }
+});
+
 // Request Header Parser Microservice
-app.get("/api/whoami", (req, res) => {
+app.get("/api/whoami/", (req, res) => {
   res.json({
     ipaddress: req.remoteAddress,
     language: req.headers["accept-language"],

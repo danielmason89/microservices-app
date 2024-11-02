@@ -79,7 +79,7 @@ input {
   display: block;
   margin-bottom: 10px;
   width: 100%;
-  border: 1px solid lightgrey;
+  border: 1px solid rgba(40, 73, 163, 0.505);
   border-radius: 3px;
   font-size: 16px;
 }
@@ -92,19 +92,18 @@ input[type="text"] {
 input[type="submit"] {
   font-size: 16px;
   border-radius: 3px;
-  background-color: #e4f1fe;
+  background-color: #286098;
   border: 1px solid grey;
   box-shadow: 2px 2px #999;
   cursor: pointer;
 }
 
 input[type="submit"]:hover {
-  background-color: #fffec4;
+  background-color: #4f2ea3;
 }
 
 code {
   font-family: monospace;
   font-size: 1.2em;
-  background-color: #fffec4;
   padding: 2px;
 }
