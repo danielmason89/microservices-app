@@ -71,7 +71,7 @@ app.get("/api/hello", (req, res) => {
 });
 
 // Exercise Tracker
-const ExerciseSchema = mongoose.Schema({
+const ExerciseSessionSchema = mongoose.Schema({
   description: { type: String, required: true },
   duration: { type: Number, required: true },
   date: { type: String },
@@ -80,10 +80,11 @@ const ExerciseSchema = mongoose.Schema({
 const UserSchema = mongoose.Schema({
   _id: { type: String },
   username: { type: String, unique: true },
+  log: [ExerciseSessionSchema],
 });
 
 const User = mongoose.model("user", UserSchema);
-const Exercise = mongoose.model("exercise", ExerciseSchema);
+const Session = mongoose.model("session", ExerciseSessionSchema);
 
 app.post("/api/users", async (req, res) => {
   try {
@@ -113,28 +114,37 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
   const { description, duration, date } = req.body;
 
   try {
-    const user = await ExerciseUser.findById(_id);
-
+    const user = await User.findById(_id);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const newExercise = {
-      description,
+    const doc = new Session({
+      description: description,
       duration: parseInt(duration),
-      date: date ? new Date(date) : new Date(),
+      date: date
+        ? new Date(date).toISOString().substring(0, 10)
+        : new Date().toISOString().substring(0, 10),
+    });
+
+    user.log.push(doc);
+    await doc.save();
+
+    const updatedUser = await User.findByIdAndUpdate(
+      _id,
+      { $push: { log: doc } },
+      { new: true }
+    );
+
+    const resObject = {
+      _id: updatedUser.id,
+      username: updatedUser.username,
+      date: new Date(doc.date).toDateString(),
+      description: doc.description,
+      duration: doc.duration,
     };
 
-    user.exercises.push(newExercise);
-    await user.save();
-
-    res.json({
-      _id: user._id,
-      username: user.username,
-      description: newExercise.description,
-      duration: newExercise.duration,
-      date: newExercise.date.toDateString(),
-    });
+    res.json(resObject);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to add exercise" });

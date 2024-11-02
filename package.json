@@ -3,12 +3,12 @@
   "version": "0.0.1",
   "type": "module",
   "description": "Daniel Mason's FCC Backend Challenge App",
-  "main": "index.js",
+  "main": "server.js",
   "engines": {
     "node": "20.x"
   },
   "scripts": {
-    "start": " nodemon --inspect index.js localhost 3000",
+    "start": " nodemon --inspect server.js localhost 3000",
     "test": "node test.js"
   },
   "dependencies": {
