@@ -71,10 +71,9 @@ app.get("/api/hello", (req, res) => {
 });
 
 // Exercise Tracker
-
 let ExerciseUserSchema = mongoose.Schema({
-  _id: String,
-  username: String,
+  _id: { type: String },
+  username: { type: String, unique: true },
 });
 
 const ExerciseUser = mongoose.model("exerciseUser", ExerciseUserSchema);
@@ -98,6 +97,18 @@ app.post("/api/new-users/", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to save user" });
+  }
+});
+
+app.get("/api/users", async (req, res) => {
+  try {
+    const exerciseUsers = await ExerciseUser.find({});
+    res.json({
+      users: exerciseUsers,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to retrieve users" });
   }
 });
 
