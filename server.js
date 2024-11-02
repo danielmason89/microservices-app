@@ -75,7 +75,7 @@ app.get("/api/hello", (req, res) => {
 });
 
 // File Metadata Microservice
-app.post("/api/fileanalyse", upload().single("upfile"), (req, res) => {
+app.post("/api/fileanalyse", upload.single("upfile"), (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
     const responseObject = {
