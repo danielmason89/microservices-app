@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 import Url from "./models/urlModel.js";
 import multer from "multer";
 
-const upload = multer();
+const upload = multer({ dest: "upfile/" });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const port = process.env.PORT || 3000;
@@ -83,7 +83,6 @@ app.post("/api/fileanalyse", upload.single("upfile"), (req, res) => {
       type: req.file.mimetype,
       size: req.file.size,
     };
-    console.log(req.file);
     res.json(responseObject);
   } catch (err) {
     console.error(err);
