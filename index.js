@@ -2,12 +2,10 @@ import { fileURLToPath } from "url";
 import path from "path";
 import dotenv from "dotenv";
 import express from "express";
-// enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-// so that your API is remotely testable by FCC
 import cors from "cors";
 import expressAsyncHandler from "express-async-handler";
 import validator from "validator";
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import Url from "./models/urlModel.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,11 +19,6 @@ const app = express();
 const connectDb = async () => {
   try {
     const connect = await mongoose.connect(process.env.DB_URI);
-    console.log(
-      "Database connected:",
-      connect.connection.host,
-      connect.connection.name
-    );
   } catch (err) {
     console.error(err.message);
   }
@@ -41,11 +34,8 @@ const isValidUrl = (url) => {
 };
 
 connectDb();
-
 app.use(cors()); // allow requests from all servers
-
 app.use(express.urlencoded({ extended: true }));
-
 app.use("/public", express.static(`${process.cwd()}/public`));
 
 // http://expressjs.com/en/starter/static-files.html
@@ -69,11 +59,17 @@ app.get("/url-shortener", (req, res) => {
   res.sendFile(__dirname + "/views/url-shortener.html");
 });
 
+app.get("/exercise-tracker", (req, res) => {
+  res.sendFile(__dirname + "/views/exercise-tracker.html");
+});
+
 // test API endpoint...
 app.get("/api/hello", (req, res) => {
   console.log({ greeting: "hello API" });
   res.json({ greeting: "hello API" });
 });
+
+// Exercise Tracker
 
 // Request Header Parser Microservice
 app.get("/api/whoami", (req, res) => {
