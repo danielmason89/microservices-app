@@ -101,7 +101,7 @@ app.post("/api/new-users/", async (req, res) => {
 });
 
 app.get("/api/users", async (req, res) => {
-  const exerciseUsers = await ExerciseUser.find({}, "username, _id");
+  const exerciseUsers = await ExerciseUser.find({}, "username _id");
   console.log(exerciseUsers, "exerciseUsers");
   return res.json(exerciseUsers);
 });
