@@ -8,10 +8,10 @@ import validator from "validator";
 import mongoose, { Schema } from "mongoose";
 import Url from "./models/urlModel.js";
 import { nanoid } from "nanoid";
+import { type } from "os";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const port = process.env.PORT || 3000;
 
 dotenv.config();
@@ -71,19 +71,24 @@ app.get("/api/hello", (req, res) => {
 });
 
 // Exercise Tracker
-const ExerciseUserSchema = mongoose.Schema({
+const ExerciseSchema = mongoose.Schema({
+  description: { type: String, required: true },
+  duration: { type: Number, required: true },
+  date: { type: String },
+});
+
+const UserSchema = mongoose.Schema({
   _id: { type: String },
   username: { type: String, unique: true },
 });
 
-const ExerciseUser = mongoose.model("exerciseUser", ExerciseUserSchema);
+const User = mongoose.model("user", UserSchema);
+const Exercise = mongoose.model("exercise", ExerciseSchema);
 
 app.post("/api/users", async (req, res) => {
-  console.log("accessing post request");
-
   try {
     let mongooseGeneratedID = new mongoose.Types.ObjectId();
-    const doc = new ExerciseUser({
+    const doc = new User({
       username: req.body.username,
       _id: mongooseGeneratedID,
     });
@@ -91,26 +96,63 @@ app.post("/api/users", async (req, res) => {
     await doc.save();
 
     res.json({
+      success: true,
       saved: true,
+      message: "User created successfully",
       username: doc.username,
       _id: doc["_id"],
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to save user" });
+    res.status(500).json({ error: "Failed to create user" });
+  }
+});
+
+app.post("/api/users/:_id/exercises", async (req, res) => {
+  const { _id } = req.params;
+  const { description, duration, date } = req.body;
+
+  try {
+    const user = await ExerciseUser.findById(_id);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const newExercise = {
+      description,
+      duration: parseInt(duration),
+      date: date ? new Date(date) : new Date(),
+    };
+
+    user.exercises.push(newExercise);
+    await user.save();
+
+    res.json({
+      _id: user._id,
+      username: user.username,
+      description: newExercise.description,
+      duration: newExercise.duration,
+      date: newExercise.date.toDateString(),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to add exercise" });
   }
 });
 
 app.get("/api/users", async (req, res) => {
   try {
-    const exerciseUsers = await ExerciseUser.find({}, "username _id");
-    console.log(exerciseUsers, "exerciseUsers");
-    return res.json(exerciseUsers);
+    const Users = await User.find({}, "username _id");
+    console.log(Users, "Users");
+    return res.json(Users);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to retrieve users" });
   }
 });
+
+app.get("/api/users/:_id/logs", async (req, res) => {});
 
 // Request Header Parser Microservice
 app.get("/api/whoami/", (req, res) => {
