@@ -1,8 +1,8 @@
 import { fileURLToPath } from "url";
 import path from "path";
 import dotenv from "dotenv";
+import { expect } from "chai";
 import express from "express";
-const expect = require("chai").expect;
 import cors from "cors";
 import expressAsyncHandler from "express-async-handler";
 import validator from "validator";
