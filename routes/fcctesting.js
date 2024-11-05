@@ -111,3 +111,11 @@ function testFilter(tests, type, n) {
   }
   return out;
 }
+
+// Exporting the setupRoutes function for CommonJS
+module.exports = setupRoutes;
+
+// Adding default export for ES Modules
+if (typeof exports === "object" && typeof module !== "undefined") {
+  exports.default = setupRoutes;
+}
