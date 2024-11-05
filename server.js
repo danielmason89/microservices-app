@@ -12,7 +12,7 @@ import multer from "multer";
 
 import apiRoutes from "./routes/api.js";
 import fccTestingRoutes from "./routes/fcctesting.js";
-import { runner } from "./test-runner";
+import "./test-runner";
 
 const upload = multer();
 const __filename = fileURLToPath(import.meta.url);
