@@ -1,7 +1,6 @@
 import { fileURLToPath } from "url";
 import path from "path";
 import dotenv from "dotenv";
-import { expect } from "chai";
 import express from "express";
 import cors from "cors";
 import expressAsyncHandler from "express-async-handler";

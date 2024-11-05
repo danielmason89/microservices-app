@@ -1,8 +1,8 @@
 "use strict";
 
-const expect = require("chai").expect;
-const ConvertHandler = require("../controllers/convertHandler.js");
+import { expect } from "chai";
+import ConvertHandler from "../controllers/convertHandler.js";
 
-module.exports = function (app) {
+export default function (app) {
   let convertHandler = new ConvertHandler();
-};
+}

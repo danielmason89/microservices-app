@@ -1,7 +1,9 @@
-const chai = require("chai");
-let assert = chai.assert;
-const ConvertHandler = require("../controllers/convertHandler.js");
+import chai from "chai";
+import ConvertHandler from "../controllers/convertHandler.js"; // Ensure the .js extension for ES modules
 
-let convertHandler = new ConvertHandler();
+const assert = chai.assert;
+const convertHandler = new ConvertHandler();
 
-suite("Unit Tests", function () {});
+suite("Unit Tests", function () {
+  // Add your tests here
+});
