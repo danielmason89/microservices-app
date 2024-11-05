@@ -10,9 +10,9 @@ import mongoose from "mongoose";
 import Url from "./models/urlModel.js";
 import multer from "multer";
 
-const apiRoutes = require("./routes/api.js");
-const fccTestingRoutes = require("./routes/fcctesting.js");
-const runner = require("./test-runner");
+import apiRoutes from "./routes/api.js";
+import fccTestingRoutes from "./routes/fcctesting.js";
+import runner from "./test-runner";
 
 const upload = multer();
 const __filename = fileURLToPath(import.meta.url);
