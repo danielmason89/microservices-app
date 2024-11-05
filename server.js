@@ -9,9 +9,6 @@ import mongoose from "mongoose";
 import Url from "./models/urlModel.js";
 import multer from "multer";
 
-import apiRoutes from "./routes/api.js";
-import fccTestingRoutes from "./routes/fcctesting.js";
-
 const upload = multer();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,15 +35,9 @@ const isValidUrl = (url) => {
 };
 
 connectDb();
-app.use(cors({ origin: "*" })); // allow requests from all servers
+app.use(cors()); // allow requests from all servers
 app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static(`${process.cwd()}/public`));
-
-//For FCC testing purposes
-fccTestingRoutes(app);
-
-//Routing for API
-apiRoutes(app);
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static("public"));
@@ -75,10 +66,6 @@ app.get("/exercise-tracker", (req, res) => {
 
 app.get("/file-metadata", (req, res) => {
   res.sendFile(__dirname + "/views/file-metadata.html");
-});
-
-app.get("/metric-imperial-converter", (req, res) => {
-  res.sendFile(__dirname + "/views/metric-imperial-converter.html");
 });
 
 // test API endpoint...
