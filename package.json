@@ -13,7 +13,7 @@
     "chai-test": "mocha ./tests/ --ui tdd"
   },
   "dependencies": {
-    "bootstrap": "^5.3.3",
+    "bootstrap": "^5.3.5",
     "cors": "^2.8.0",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.9",
